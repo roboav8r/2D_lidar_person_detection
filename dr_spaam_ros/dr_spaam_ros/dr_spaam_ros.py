@@ -154,11 +154,12 @@ def detections_to_rviz_marker(dets_xy, dets_cls):
 def detections_to_pose_array(dets_xy, dets_cls):
     pose_array = PoseArray()
     for d_xy, d_cls in zip(dets_xy, dets_cls):
+
         # Detector uses following frame convention:
         # x forward, y rightward, z downward, phi is angle w.r.t. x-axis
         p = Pose()
-        p.position.x = d_xy[0]
-        p.position.y = d_xy[1]
+        p.position.x = float(d_xy[0])
+        p.position.y = float(d_xy[1])
         p.position.z = 0.0
         pose_array.poses.append(p)
 
