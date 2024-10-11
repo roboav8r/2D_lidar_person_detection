@@ -1,13 +1,20 @@
 #!/usr/bin/env python
 
-import rospy
+import rclpy
 from dr_spaam_ros.dr_spaam_ros import DrSpaamROS
 
+def main(args=None):
+    rclpy.init(args=args)
+
+    dr_spaam_ros = DrSpaamROS()
+
+    rclpy.spin(dr_spaam_ros)
+
+    # Destroy the node explicitly
+    # (optional - otherwise it will be done automatically
+    # when the garbage collector destroys the node object)
+    dr_spaam_ros.destroy_node()
+    rclpy.shutdown()
 
 if __name__ == '__main__':
-    rospy.init_node('dr_spaam_ros')
-    try:
-        DrSpaamROS()
-    except rospy.ROSInterruptException:
-        pass
-    rospy.spin()
+    main()

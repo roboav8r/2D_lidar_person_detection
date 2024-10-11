@@ -1,6 +1,9 @@
-# import time
+import os
 import numpy as np
-import rospy
+import rclpy
+from rclpy.node import Node
+
+from ament_index_python.packages import get_package_share_directory
 
 from sensor_msgs.msg import LaserScan
 from geometry_msgs.msg import Point, Pose, PoseArray
@@ -9,10 +12,12 @@ from visualization_msgs.msg import Marker
 from dr_spaam.detector import Detector
 
 
-class DrSpaamROS:
+class DrSpaamROS(Node):
     """ROS node to detect pedestrian using DROW3 or DR-SPAAM."""
 
     def __init__(self):
+        super().__init__('dr_spaam_ros_node')
+
         self._read_params()
         self._detector = Detector(
             self.weight_file,
@@ -21,37 +26,44 @@ class DrSpaamROS:
             stride=self.stride,
             panoramic_scan=self.panoramic_scan,
         )
-        self._init()
+        self.create_pubs_subs()
 
     def _read_params(self):
         """
         @brief      Reads parameters from ROS server.
         """
-        self.weight_file = rospy.get_param("~weight_file")
-        self.conf_thresh = rospy.get_param("~conf_thresh")
-        self.stride = rospy.get_param("~stride")
-        self.detector_model = rospy.get_param("~detector_model")
-        self.panoramic_scan = rospy.get_param("~panoramic_scan")
+        self.declare_parameter("weight_file", rclpy.parameter.Parameter.Type.STRING)
+        self.declare_parameter("detector_model", rclpy.parameter.Parameter.Type.STRING)
+        self.declare_parameter("conf_thresh", rclpy.parameter.Parameter.Type.DOUBLE)
+        self.declare_parameter("stride", rclpy.parameter.Parameter.Type.INTEGER)
+        self.declare_parameter("panoramic_scan", rclpy.parameter.Parameter.Type.BOOL)
 
-    def _init(self):
+        self.package_dir = get_package_share_directory('dr_spaam_ros')
+        self.weight_file = os.path.join(self.package_dir,self.get_parameter("weight_file").get_parameter_value().string_value)
+        self.detector_model = self.get_parameter("detector_model").get_parameter_value().string_value
+        self.conf_thresh = self.get_parameter("conf_thresh").get_parameter_value().double_value
+        self.stride = self.get_parameter("stride").get_parameter_value().integer_value
+        self.panoramic_scan = self.get_parameter("panoramic_scan").get_parameter_value().bool_value
+
+    def create_pubs_subs(self):
         """
         @brief      Initialize ROS connection.
         """
         # Publisher
-        topic, queue_size, latch = read_publisher_param("detections")
-        self._dets_pub = rospy.Publisher(
-            topic, PoseArray, queue_size=queue_size, latch=latch
+        topic, queue_size, latch = read_publisher_param(self, "detections")
+        self._dets_pub = self.create_publisher(
+            PoseArray, topic, queue_size
         )
 
-        topic, queue_size, latch = read_publisher_param("rviz")
-        self._rviz_pub = rospy.Publisher(
-            topic, Marker, queue_size=queue_size, latch=latch
+        topic, queue_size, latch = read_publisher_param(self, "rviz")
+        self._rviz_pub = self.create_publisher(
+            Marker, topic, queue_size
         )
 
         # Subscriber
-        topic, queue_size = read_subscriber_param("scan")
-        self._scan_sub = rospy.Subscriber(
-            topic, LaserScan, self._scan_callback, queue_size=queue_size
+        topic, queue_size = read_subscriber_param(self, "scan")
+        self._scan_sub = self.create_subscription(
+            LaserScan, topic, self._scan_callback, queue_size
         )
 
     def _scan_callback(self, msg):
@@ -152,20 +164,28 @@ def detections_to_pose_array(dets_xy, dets_cls):
     return pose_array
 
 
-def read_subscriber_param(name):
+def read_subscriber_param(node, name):
     """
     @brief      Convenience function to read subscriber parameter.
     """
-    topic = rospy.get_param("~subscriber/" + name + "/topic")
-    queue_size = rospy.get_param("~subscriber/" + name + "/queue_size")
+    node.declare_parameter("subscriber." + name + ".topic", rclpy.Parameter.Type.STRING)
+    node.declare_parameter("subscriber." + name + ".queue_size", rclpy.Parameter.Type.INTEGER)
+    topic = node.get_parameter("subscriber." + name + ".topic").get_parameter_value().string_value
+    queue_size = node.get_parameter("subscriber." + name + ".queue_size").get_parameter_value().integer_value
+
     return topic, queue_size
 
 
-def read_publisher_param(name):
+def read_publisher_param(node,name):
     """
     @brief      Convenience function to read publisher parameter.
     """
-    topic = rospy.get_param("~publisher/" + name + "/topic")
-    queue_size = rospy.get_param("~publisher/" + name + "/queue_size")
-    latch = rospy.get_param("~publisher/" + name + "/latch")
+    node.declare_parameter("publisher." + name + ".topic", rclpy.Parameter.Type.STRING)
+    node.declare_parameter("publisher." + name + ".queue_size", rclpy.Parameter.Type.INTEGER)
+    node.declare_parameter("publisher." + name + ".latch", rclpy.Parameter.Type.BOOL)
+
+    topic = node.get_parameter("publisher." + name + ".topic").get_parameter_value().string_value
+    queue_size = node.get_parameter("publisher." + name + ".queue_size").get_parameter_value().integer_value
+    latch = node.get_parameter("publisher." + name + ".latch").get_parameter_value().bool_value
+    
     return topic, queue_size, latch

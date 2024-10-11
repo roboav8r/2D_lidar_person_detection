@@ -1,18 +1,21 @@
 <?xml version="1.0"?>
-<package>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
   <name>dr_spaam_ros</name>
-  <version>1.0.0</version>
-  <description>ROS interface for DR-SPAAM detector</description>
-
+  <version>0.0.0</version>
+  <description>ROS2 interface for DR-SPAAM detector</description>
   <maintainer email="jia@vision.rwth-aachen.de">Dan Jia</maintainer>
+  <license>Apache-2.0</license>
 
-  <!-- One license tag required, multiple allowed, one license per tag -->
-  <!-- Commonly used license strings: -->
-  <!--   BSD, MIT, Boost Software License, GPLv2, GPLv3, LGPLv2.1, LGPLv3 -->
-  <license>TODO</license>
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <exec_depend>rclpy</exec_depend>
+  <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>sensor_msgs</exec_depend>
 
-  <buildtool_depend>catkin</buildtool_depend>
-  <run_depend>rospy</run_depend>
-  <run_depend>geometry_msgs</run_depend>
-  <run_depend>sensor_msgs</run_depend>
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
 </package>
