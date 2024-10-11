@@ -62,14 +62,15 @@ class DrSpaamROS(Node):
 
         # Subscriber
         topic, queue_size = read_subscriber_param(self, "scan")
+        qos_profile = rclpy.qos.QoSProfile(reliability=rclpy.qos.QoSReliabilityPolicy.BEST_EFFORT, history=rclpy.qos.QoSHistoryPolicy.KEEP_LAST,depth=queue_size)
         self._scan_sub = self.create_subscription(
-            LaserScan, topic, self._scan_callback, queue_size
+            LaserScan, topic, self._scan_callback, qos_profile
         )
 
     def _scan_callback(self, msg):
         if (
-            self._dets_pub.get_num_connections() == 0
-            and self._rviz_pub.get_num_connections() == 0
+            self._dets_pub.get_subscription_count() == 0
+            and self._rviz_pub.get_subscription_count() == 0
         ):
             return
 

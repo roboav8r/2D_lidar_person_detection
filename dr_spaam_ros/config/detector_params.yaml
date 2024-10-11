@@ -22,5 +22,5 @@
 
     subscriber:
         scan:
-            topic: /segway/scan_multi
+            topic: /philbart/scan
             queue_size: 1
