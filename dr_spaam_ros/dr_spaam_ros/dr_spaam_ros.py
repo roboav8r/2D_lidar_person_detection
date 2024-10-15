@@ -62,14 +62,15 @@ class DrSpaamROS(Node):
 
         # Subscriber
         topic, queue_size = read_subscriber_param(self, "scan")
+        qos_profile = rclpy.qos.QoSProfile(reliability=rclpy.qos.QoSReliabilityPolicy.BEST_EFFORT, history=rclpy.qos.QoSHistoryPolicy.KEEP_LAST,depth=queue_size)
         self._scan_sub = self.create_subscription(
-            LaserScan, topic, self._scan_callback, queue_size
+            LaserScan, topic, self._scan_callback, qos_profile
         )
 
     def _scan_callback(self, msg):
         if (
-            self._dets_pub.get_num_connections() == 0
-            and self._rviz_pub.get_num_connections() == 0
+            self._dets_pub.get_subscription_count() == 0
+            and self._rviz_pub.get_subscription_count() == 0
         ):
             return
 
@@ -153,11 +154,12 @@ def detections_to_rviz_marker(dets_xy, dets_cls):
 def detections_to_pose_array(dets_xy, dets_cls):
     pose_array = PoseArray()
     for d_xy, d_cls in zip(dets_xy, dets_cls):
+
         # Detector uses following frame convention:
         # x forward, y rightward, z downward, phi is angle w.r.t. x-axis
         p = Pose()
-        p.position.x = d_xy[0]
-        p.position.y = d_xy[1]
+        p.position.x = float(d_xy[0])
+        p.position.y = float(d_xy[1])
         p.position.z = 0.0
         pose_array.poses.append(p)
 
