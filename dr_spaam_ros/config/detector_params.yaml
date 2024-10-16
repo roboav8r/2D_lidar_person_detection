@@ -5,7 +5,7 @@
     detector_model: "DROW3"  # DROW3 or DR-SPAAM
     # weight_file: "ckpts/ckpt_jrdb_ann_dr_spaam_e20.pth"
     # detector_model: "DR-SPAAM"  # DROW3 or DR-SPAAM
-    conf_thresh: 0.5
+    conf_thresh: 0.65
     stride: 5  # use this to skip laser points
     panoramic_scan: True  # Set to true if the scan covers 360 degree
 

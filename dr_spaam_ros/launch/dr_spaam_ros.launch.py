@@ -14,7 +14,7 @@ def generate_launch_description():
         'detector_params.yaml'
     )
 
-    # Audio acquisition node
+    # LiDAR leg detection
     node = Node(
         package='dr_spaam_ros',
         executable='node.py',
@@ -25,10 +25,3 @@ def generate_launch_description():
     ld.add_action(node)
 
     return ld
-
-# <launch>
-#   <node pkg="dr_spaam_ros" type="node.py" name="dr_spaam_ros" output="screen">
-#     <rosparam command="load" file="$(find dr_spaam_ros)/config/dr_spaam_ros.yaml"/>
-#     <rosparam command="load" file="$(find dr_spaam_ros)/config/topics.yaml"/>
-#   </node>
-# </launch>
