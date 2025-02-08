@@ -18,9 +18,6 @@
 # .vscode/
 *.egg-info/
 build/
-ckpt/
-ckpts/
-ckpts
 data
 dist/
 devel/
